@@ -87,6 +87,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- حدث تغيير الفيديو ---
+    socket.on('change-video', (data) => {
+        if (rooms[data.roomId]) {
+            // 1. تحديث الرابط الرسمي للغرفة
+            rooms[data.roomId].videoState.videoUrl = data.videoUrl;
+            // 2. إعادة تعيين الوقت عند تغيير الفيديو
+            rooms[data.roomId].videoState.currentTime = 0;
+            rooms[data.roomId].videoState.isPlaying = false;
+            
+            // 3. إعلام جميع من في الغرفة (بما فيهم المرسل) بالرابط الجديد
+            io.to(data.roomId).emit('video-changed', { videoUrl: data.videoUrl });
+            
+            console.log(`[تغيير الفيديو] في الغرفة ${data.roomId} إلى ${data.videoUrl}`);
+        }
+    });
+
     // --- حدث المغادرة ---
     socket.on('disconnect', () => {
         console.log(`[انقطاع اتصال] - ${socket.id}`);
