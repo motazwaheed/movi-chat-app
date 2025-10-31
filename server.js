@@ -59,8 +59,11 @@ io.on('connection', (socket) => {
     // --- أحداث الدردشة ---
     socket.on('send-message', (data) => {
         // إرسال الرسالة للجميع في الغرفة (بما فيهم المرسل)
-        // لتجنب تكرار الرسالة عند المرسل، الكود في ملفك يعالج هذا
-        socket.to(data.roomId).emit('new-message', data);
+        
+        // ! --- هذا هو الإصلاح ---
+        // تم تغيير 'socket.to' إلى 'io.to'
+        // هذا يضمن أن المرسل يستقبل رسالته أيضاً
+        io.to(data.roomId).emit('new-message', data);
     });
 
     // --- أحداث مزامنة الفيديو ---
@@ -108,7 +111,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- أضف هذا الحدث الجديد داخل io.on('connection', ...) ---
+    // --- حدث تغيير الفيديو ---
     socket.on('change-video', (data) => {
         if (rooms[data.roomId]) {
             // 1. تحديث الرابط الرسمي للغرفة
